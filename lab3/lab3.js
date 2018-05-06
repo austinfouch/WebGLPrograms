@@ -221,7 +221,6 @@ function render()
     ctm = mult(ctm, rotateY(rotY));
     ctm = mult(ctm, rotateZ(rotZ));
 
-
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(ctm) );
 
     gl.drawElements(gl.TRIANGLES, vertex_data.indices.length, gl.UNSIGNED_SHORT, 0);
