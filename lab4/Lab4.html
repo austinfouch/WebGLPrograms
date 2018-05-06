@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+varying vec3 N, L, E;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+uniform mat3 normalMatrix;
+
+void main()
+{
+    vec3 light;
+    vec3 pos = (modelViewMatrix * vPosition).xyz;
+    if(lightPosition.z == 0.0)  L = normalize(lightPosition.xyz);
+    else  L = normalize(lightPosition).xyz - pos;
+
+    E =  -normalize(pos);
+    N = normalize( normalMatrix*vNormal.xyz);
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+uniform vec4 ambientProduct;
+uniform vec4 diffuseProduct;
+uniform vec4 specularProduct;
+varying vec3 N, L, E;
+uniform float shininess;
+
+void main()
+{    
+    vec4 fColor;
+    
+    vec3 H = normalize( L + E );
+    vec4 ambient = ambientProduct;
+
+    float Kd = max( dot(L, N), 0.0 );
+    vec4  diffuse = Kd*diffuseProduct;
+
+    float Ks = pow( max(dot(N, H), 0.0), shininess );
+    vec4  specular = Ks * specularProduct;
+    
+    if( dot(L, N) < 0.0 ) {
+      specular = vec4(0.0, 0.0, 0.0, 1.0);
+    } 
+
+    fColor = ambient + diffuse + specular;
+    fColor.a = 1.0;
+
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="jscolor.js"></script>
+<script type="text/javascript" src="Lab4.js"></script>
+
+<body>
+<label for="ambient">Ambient</label>
+<input type="checkbox" id="ambient" checked/>
+
+<label for="specular">Specular</label>
+<input type="checkbox" id="specular" checked/>
+
+<label for="diffuse">Diffuse</label>
+<input type="checkbox" id="diffuse" checked/>
+
+<br>
+
+<label for="materialAmbient">Material Ambient Color</label>
+<input id="materialAmbient" class="jscolor {onFineChange:'updateMaterialAmbient(this)'}"/>
+<br>
+<label for="materialDiffuse">Material Diffuse Color</label>
+<input id="materialDiffuse" class="jscolor {onFineChange:'updateMaterialDiffuse(this)'}"/>
+<br>
+<label for="materialSpecular">Material Specular Color</label>
+<input id="materialSpecular" class="jscolor {onFineChange:'updateMaterialSpecular(this)'}"/>
+<br>
+<label for="lightAmbient">Ambient Light Color</label>
+<input id="lightAmbient" class="jscolor {onFineChange:'updateLightAmbient(this)'}"/>
+<br>
+<label for="lightDiffuse">Diffuse Light Color</label>
+<input id="lightDiffuse" class="jscolor {onFineChange:'updateLightDiffuse(this)'}"/>
+<br>
+<label for="lightSpecular">Specular Light Color</label>
+<input id="lightSpecular" class="jscolor {onFineChange:'updateLightSpecular(this)'}"/>
+
+<canvas id="gl-canvas" width="512" height="512">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+</html>
